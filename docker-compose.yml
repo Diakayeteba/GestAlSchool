@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: educloud-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: moodle
+      POSTGRES_USER: moodle
+      POSTGRES_PASSWORD: moodle_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - educloud
+
+  moodle:
+    image: educloud-moodle:4.5.14
+    container_name: educloud-moodle
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    environment:
+      MOODLE_DB_TYPE: pgsql
+      MOODLE_DB_HOST: postgres
+      MOODLE_DB_PORT: 5432
+      MOODLE_DB_NAME: moodle
+      MOODLE_DB_USER: moodle
+      MOODLE_DB_PASSWORD: moodle_password
+      MOODLE_URL: http://localhost:8080
+    volumes:
+      - moodle_data:/var/www/moodledata
+    networks:
+      - educloud
+
+  sync-moodle:
+    build: ./sync-moodle
+    restart: always
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=moodle
+      - DB_USER=moodle
+      - DB_PASSWORD=moodle_password
+      - ASSISTANT_URL=http://open-webui:8080
+      - ASSISTANT_API_KEY=sk-votre-cle-api-open-webui
+      - MOODLE_DATA=/moodledata
+      - SYNC_INTERVAL=30
+    volumes:
+      - moodle_data:/moodledata:ro
+    depends_on:
+      - postgres
+      - open-webui
+    networks:
+      - educloud
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: educloud-webui
+    restart: unless-stopped
+    init: true
+    ports:
+      - "3001:8080"
+    volumes:
+      - open-webui_data:/app/backend/data
+    environment:
+      - OPENAI_API_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+      - OPENAI_API_KEY=${GEMINI_API_KEY}
+      - WEBUI_AUTH=True
+      - CORS_ALLOW_ORIGIN=*
+      - WEBUI_SESSION_COOKIE_SAME_SITE=lax
+      - WEBUI_NAME=MadouGPT
+    entrypoint: >
+      sh -c "sed -i 's/.*(Open WebUI).*/    pass/' /app/backend/open_webui/env.py && exec bash start.sh"
+    networks:
+      - educloud
+
+volumes:
+  postgres_data:
+  moodle_data:
+  open-webui_data:
+
+networks:
+  educloud:
+    driver: bridge
