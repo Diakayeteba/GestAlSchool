@@ -64,7 +64,7 @@ services:
       - open-webui_data:/app/backend/data
     environment:
       - OPENAI_API_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
-      - OPENAI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - WEBUI_AUTH=True
       - CORS_ALLOW_ORIGIN=*
       - WEBUI_SESSION_COOKIE_SAME_SITE=lax
