@@ -33,25 +33,25 @@ services:
     networks:
       - educloud
 
-  sync-moodle:
-    build: ./sync-moodle
-    restart: always
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=moodle
-      - DB_USER=moodle
-      - DB_PASSWORD=moodle_password
-      - ASSISTANT_URL=http://open-webui:8080
-      - ASSISTANT_API_KEY=sk-votre-cle-api-open-webui
-      - MOODLE_DATA=/moodledata
-      - SYNC_INTERVAL=30
-    volumes:
-      - moodle_data:/moodledata:ro
-    depends_on:
-      - postgres
-      - open-webui
-    networks:
-      - educloud
+  # sync-moodle:
+  #   build: ./sync-moodle
+  #   restart: always
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_NAME=moodle
+  #     - DB_USER=moodle
+  #     - DB_PASSWORD=moodle_password
+  #     - ASSISTANT_URL=http://open-webui:8080
+  #     - ASSISTANT_API_KEY=sk-votre-cle-api-open-webui
+  #     - MOODLE_DATA=/moodledata
+  #     - SYNC_INTERVAL=30
+  #   volumes:
+  #     - moodle_data:/moodledata:ro
+  #   depends_on:
+  #     - postgres
+  #     - open-webui
+    # networks:
+    #   - educloud
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
